@@ -22,6 +22,16 @@ def test__when_moving__should_not_go_outside_world_boundary():
                 "steps": 1}]
             }
     
+    response_body = {
+        "robot": {
+            "id": 1,
+            "timestamp": "2018-05-12 12:45:10.851596",
+            "commands": 2,
+            "result": 4,
+            "duration": 0.000123
+        }
+    }
+    
     with app.test_client() as c:
         response = c.post(url, json=request_body)
-    assert json.loads(response.data) == request_body
+    assert json.loads(response.data) == response_body
