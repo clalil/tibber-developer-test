@@ -17,17 +17,29 @@ class EndpointClient:
     # @staticmethod
     # def timestamp():
     #     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+
+    def get_coors(self, coordinates):
+        x1 = coordinates[0][0][1]
+        y1 = coordinates[0][1][1]
+        x2 = coordinates[-1][0][1]
+        y2 = coordinates[-1][1][1]
+
+        return x1, y1, x2, y2
     
     def count_moves(self):
-        coordinates = [("x", self.x), ("y", self.y)]
+        coordinates = [(("x", self.x), ("y", self.y))]
+        increment_x = self.x
+        increment_y = self.y
         for move in self.moves:
             if move["direction"] == "east" or move["direction"] == "west":
-                self.x += self.directions[move["direction"]] * move["steps"]
-                coordinates.extend([(("x", self.x), ("y", self.y))])
+                increment_x += self.directions[move["direction"]] * move["steps"]
+                coordinates.extend([(("x", increment_x), ("y", increment_y))])
             if move["direction"] == "north" or move["direction"] == "south":
-                self.y += self.directions[move["direction"]] * move["steps"]
-                coordinates.extend([(("x", self.x), ("y", self.y))])
+                increment_y += self.directions[move["direction"]] * move["steps"]
+                coordinates.extend([(("x", increment_x), ("y", increment_y))])
 
+        x1, y1, x2, y2 = self.get_coors(coordinates)
+        path_travelled_between_cors = max(abs(x1 - x2),abs(y1 - y2))
             # calculate if move is unique
 
 
@@ -60,3 +72,5 @@ def create_request():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
+
