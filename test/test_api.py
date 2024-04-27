@@ -1,4 +1,4 @@
-from app.api import app
+from src.api import app, EndpointClient
 import json
 import pytest
 
@@ -9,29 +9,66 @@ def robot_app():
     })
     yield app
 
-def test__when_moving__should_not_go_outside_world_boundary():
-    url = '/tibber-developer-test/enter-path'
+
+@pytest.fixture
+def request_body():
     request_body = {
-            "start": {
-                "x": 10,
-                "y": 22 },
-            "commmands": [{
-                "direction": "east",
-                "steps": 2 },
-                {"direction": "north",
-                "steps": 1}]
-            }
-    
-    response_body = {
-        "robot": {
-            "id": 1,
-            "timestamp": "2018-05-12 12:45:10.851596",
-            "commands": 2,
-            "result": 4,
-            "duration": 0.000123
+        "start": {
+            "x": 10,
+            "y": 22 },
+        "commmands": [{
+            "direction": "east",
+            "steps": 2 },
+            {"direction": "north",
+            "steps": 1}]
         }
+    return request_body
+
+
+@pytest.fixture
+def response_body():
+    response_body = {
+    "robot": {
+        "id": 1,
+        "timestamp": "2018-05-12 12:45:10.851596",
+        "commands": 2,
+        "result": 4,
+        "duration": 0.000123
     }
+    }
+    return response_body
+
+# def test__when_making_a_post__should_return_valid_():
+#     url = '/tibber-developer-test/enter-path'
+#     request_body = {
+#             "start": {
+#                 "x": 10,
+#                 "y": 22 },
+#             "commmands": [{
+#                 "direction": "east",
+#                 "steps": 2 },
+#                 {"direction": "north",
+#                 "steps": 1}]
+#             }
     
-    with app.test_client() as c:
-        response = c.post(url, json=request_body)
-    assert json.loads(response.data) == response_body
+#     response_body = {
+#         "robot": {
+#             "id": 1,
+#             "timestamp": "2018-05-12 12:45:10.851596",
+#             "commands": 2,
+#             "result": 4,
+#             "duration": 0.000123
+#         }
+#     }
+    
+#     with app.test_client() as c:
+#         response = c.post(url, json=request_body)
+#     assert json.loads(response.data) == response_body
+
+
+def test__client_should_return_summary_when_called(request_body):
+    x = request_body["start"]["x"]
+    y = request_body["start"]["y"]
+    moves = request_body['commmands']
+    client = EndpointClient(x, y, moves)
+    assert response_body == client.count_moves()
