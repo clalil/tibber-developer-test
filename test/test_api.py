@@ -1,4 +1,5 @@
 from src.api import app, EndpointClient
+from freezegun import freeze_time
 import json
 import pytest
 
@@ -65,6 +66,7 @@ def response_body():
 #         response = c.post(url, json=request_body)
 #     assert json.loads(response.data) == response_body
 
+@freeze_time("2018-05-12 12:45:10.851596")
 def test__client_should_return_summary_when_called(request_body, response_body):
     x = request_body["start"]["x"]
     y = request_body["start"]["y"]
