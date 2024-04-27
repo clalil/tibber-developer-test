@@ -27,12 +27,12 @@ class EndpointClient:
         for move in self.moves:
             for step in range(move["steps"]):
                 if move["direction"] == "east" or move["direction"] == "west":
-                    x += 1
+                    x += self.directions[move["direction"]]
                     coordinates.append((("x", x), ("y", y)))
                 if move["direction"] == "north" or move["direction"] == "south":
-                    y += 1
+                    y += self.directions[move["direction"]]
                     coordinates.append((("x", x), ("y", y)))
-
+        # pdb.set_trace()
         unique_moves = len(set(coordinates))
         return unique_moves
 
@@ -41,7 +41,7 @@ class EndpointClient:
         start_time = time.perf_counter()
         response_body = [{
             "robot": {
-                "id": 1,
+                "id": 0,
                 "timestamp": str(self.timestamp()),
                 "commands": self.sum_moves,
                 "result": self.count_moves(),

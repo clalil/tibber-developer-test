@@ -82,8 +82,7 @@ def test__client_should_return_summary_when_called(request_body, response_body):
     y = request_body["start"]["y"]
     moves = request_body['commmands']
     client = EndpointClient(x, y, moves)
-    resp = client.create_response_body()
-    pdb.set_trace()
+    resp = client.create_response_body()g
     assert response_body[0]["robot"]["timestamp"] == resp[0]["robot"]["timestamp"]
     assert response_body[0]["robot"]["commands"] == resp[0]["robot"]["commands"]
     assert response_body[0]["robot"]["result"] == resp[0]["robot"]["result"]
