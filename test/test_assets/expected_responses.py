@@ -17,3 +17,14 @@ TRACK_BACK_RESPONSE_BODY = [{
         "duration": 0.000123
         }
     }]
+
+
+CROSS_TWICE_RESPONSE_BODY = [{
+    "robot": {
+        "id": 1,
+        "timestamp": "2018-05-12 12:45:10.851596",
+        "commands": 5,
+        "result": 9,
+        "duration": 0.000123
+        }
+    }]
