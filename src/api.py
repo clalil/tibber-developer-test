@@ -27,21 +27,20 @@ class EndpointClient:
         for move in self.moves:
             for step in range(move["steps"]):
                 if move["direction"] == "east" or move["direction"] == "west":
-                    x += 1
+                    x += self.directions[move["direction"]]
                     coordinates.append((("x", x), ("y", y)))
                 if move["direction"] == "north" or move["direction"] == "south":
-                    y += 1
+                    y += self.directions[move["direction"]]
                     coordinates.append((("x", x), ("y", y)))
-
+        # pdb.set_trace()
         unique_moves = len(set(coordinates))
         return unique_moves
-
 
     def create_response_body(self):
         start_time = time.perf_counter()
         response_body = [{
             "robot": {
-                "id": 1,
+                "id": 0,
                 "timestamp": str(self.timestamp()),
                 "commands": self.sum_moves,
                 "result": self.count_moves(),
@@ -52,6 +51,7 @@ class EndpointClient:
         response_body[0]["robot"]["duration"] = duration_six_decimals
         return response_body
 
+
 def app_response_body(resp):
     x = resp["start"]["x"]
     y = resp["start"]["y"]
@@ -59,6 +59,7 @@ def app_response_body(resp):
     client = EndpointClient(x, y, moves)
     resp_body = client.create_response_body()
     return resp_body
+
 
 @app.post("/tibber-developer-test/enter-path")
 def create_request():

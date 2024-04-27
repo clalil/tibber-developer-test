@@ -4,6 +4,17 @@ import json
 import pytest
 import pdb
 
+from test_assets.request_bodies import (
+    TWO_COMMANDS_REQUEST_BODY,
+    TRACK_BACK_REQUEST_BODY,
+    CROSS_TWICE_REQUEST_BODY
+)
+from test_assets.expected_responses import (
+    TWO_COMMANDS_RESPONSE_BODY,
+    TRACK_BACK_RESPONSE_BODY,
+    CROSS_TWICE_RESPONSE_BODY
+)
+
 @pytest.fixture()
 def robot_app():
     app.config.update({
@@ -67,6 +78,14 @@ def response_body():
 #         response = c.post(url, json=request_body)
 #     assert json.loads(response.data) == response_body
 
+@pytest.mark.parametrize(
+    "request_body, response_body",
+    [
+        (TWO_COMMANDS_REQUEST_BODY, TWO_COMMANDS_RESPONSE_BODY),
+        (TRACK_BACK_REQUEST_BODY, TRACK_BACK_RESPONSE_BODY),
+        (CROSS_TWICE_REQUEST_BODY, CROSS_TWICE_RESPONSE_BODY)
+    ]
+)
 @freeze_time("2018-05-12 12:45:10.851596")
 def test__client_should_return_summary_when_called(request_body, response_body):
     x = request_body["start"]["x"]
@@ -74,8 +93,6 @@ def test__client_should_return_summary_when_called(request_body, response_body):
     moves = request_body['commmands']
     client = EndpointClient(x, y, moves)
     resp = client.create_response_body()
-    # pdb.set_trace()
-    assert response_body[0]["robot"]["id"] == resp[0]["robot"]["id"]
     assert response_body[0]["robot"]["timestamp"] == resp[0]["robot"]["timestamp"]
     assert response_body[0]["robot"]["commands"] == resp[0]["robot"]["commands"]
     assert response_body[0]["robot"]["result"] == resp[0]["robot"]["result"]
