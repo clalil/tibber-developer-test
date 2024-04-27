@@ -41,9 +41,11 @@ class EndpointClient:
         start_time = time.perf_counter()
         response_body = [{
             "robot": {
+                "id": 1,
                 "timestamp": str(self.timestamp()),
                 "commands": self.sum_moves,
                 "result": self.count_moves(),
+                "duration": 0
             }
         }]
         duration_six_decimals = "{:.4f}".format(time.perf_counter() - start_time)
