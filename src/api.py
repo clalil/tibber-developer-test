@@ -18,29 +18,48 @@ class EndpointClient:
     # def timestamp():
     #     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
 
-    def get_coors(self, coordinates):
-        x1 = coordinates[0][0][1]
-        y1 = coordinates[0][1][1]
-        x2 = coordinates[-1][0][1]
-        y2 = coordinates[-1][1][1]
+    # def get_coors(self, coordinates):
+    #     x1 = coordinates[0][0][1]
+    #     y1 = coordinates[0][1][1]
+    #     x2 = coordinates[-1][0][1]
+    #     y2 = coordinates[-1][1][1]
 
-        return x1, y1, x2, y2
+    #     return x1, y1, x2, y2
     
+    # def count_moves(self):
+    #     coordinates = [(("x", self.x), ("y", self.y))]
+    #     increment_x = self.x
+    #     increment_y = self.y
+    #     for move in self.moves:
+    #         if move["direction"] == "east" or move["direction"] == "west":
+    #             increment_x += self.directions[move["direction"]] * move["steps"]
+    #             coordinates.extend([(("x", increment_x), ("y", increment_y))])
+    #         if move["direction"] == "north" or move["direction"] == "south":
+    #             increment_y += self.directions[move["direction"]] * move["steps"]
+    #             coordinates.extend([(("x", increment_x), ("y", increment_y))])
+
+        # x1, y1, x2, y2 = self.get_coors(coordinates)
+        # path_travelled_between_cors = max(abs(x1 - x2),abs(y1 - y2))
+            # calculate if move is unique
+
+# moves = [{'direction': 'east', 'steps': 2}, {'direction': 'north', 'steps': 1}]
+
     def count_moves(self):
         coordinates = [(("x", self.x), ("y", self.y))]
-        increment_x = self.x
-        increment_y = self.y
+        x = self.x
+        y = self.y
         for move in self.moves:
-            if move["direction"] == "east" or move["direction"] == "west":
-                increment_x += self.directions[move["direction"]] * move["steps"]
-                coordinates.extend([(("x", increment_x), ("y", increment_y))])
-            if move["direction"] == "north" or move["direction"] == "south":
-                increment_y += self.directions[move["direction"]] * move["steps"]
-                coordinates.extend([(("x", increment_x), ("y", increment_y))])
-
-        x1, y1, x2, y2 = self.get_coors(coordinates)
-        path_travelled_between_cors = max(abs(x1 - x2),abs(y1 - y2))
-            # calculate if move is unique
+            for step in range(move["steps"]):
+                print(step)
+                if move["direction"] == "east" or move["direction"] == "west":
+                    x += 1
+                    coordinates.append((("x", x), ("y", y)))
+                if move["direction"] == "north" or move["direction"] == "south":
+                    y += 1
+                    coordinates.append((("x", x), ("y", y)))
+        print(coordinates)
+        # breakpoint()
+        return coordinates
 
 
 # score = sum(base_rules[d].get(dice.count(d), 0) for d in set(dice))
