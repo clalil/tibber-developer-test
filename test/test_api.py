@@ -27,16 +27,16 @@ def request_body():
 
 @pytest.fixture
 def response_body():
-    response_body = {
-    "robot": {
+    response_body = [{
+    "result": {
         "id": 1,
         "timestamp": "2018-05-12 12:45:10.851596",
         "commands": 2,
         "result": 4,
         "duration": 0.000123
-    }
-    }
-    return response_body
+        }
+    }]
+    return json.dumps(response_body)
 
 # def test__when_making_a_post__should_return_valid_():
 #     url = '/tibber-developer-test/enter-path'
@@ -65,10 +65,10 @@ def response_body():
 #         response = c.post(url, json=request_body)
 #     assert json.loads(response.data) == response_body
 
-
-def test__client_should_return_summary_when_called(request_body):
+def test__client_should_return_summary_when_called(request_body, response_body):
     x = request_body["start"]["x"]
     y = request_body["start"]["y"]
     moves = request_body['commmands']
     client = EndpointClient(x, y, moves)
-    assert response_body == client.count_moves()
+    resp = client.create_response_body()
+    assert response_body == resp
