@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 import datetime as datetime
 import time
-# import pdb
-# pdb.set_trace()
+import pdb
+
+
 app = Flask(__name__)
 
 class EndpointClient:
@@ -33,33 +34,23 @@ class EndpointClient:
                     coordinates.append((("x", x), ("y", y)))
 
         unique_moves = len(set(coordinates))
-
         return unique_moves
 
 
     def create_response_body(self):
+        start_time = time.perf_counter()
         response_body = [{
-            "result": {
+            "robot": {
                 "timestamp": str(self.timestamp()),
                 "commands": self.sum_moves,
                 "result": self.count_moves(),
-                "duration": 0.1
             }
         }]
+        duration_six_decimals = "{:.4f}".format(time.perf_counter() - start_time)
+        response_body[0]["robot"]["duration"] = duration_six_decimals
         return response_body
 
-
-# score = sum(base_rules[d].get(dice.count(d), 0) for d in set(dice))
-
-    
-    # for each move, update coordinates. 
-    # make Set to distinguish unique
-    # end time
-    # create response
-
 def app_response_body(resp):
-    print(f"Here is request: {resp}")
-    # print(f"Here is commands: {resp['commands']}")
     x = resp["start"]["x"]
     y = resp["start"]["y"]
     moves = resp['commmands']

@@ -28,7 +28,7 @@ def request_body():
 @pytest.fixture
 def response_body():
     response_body = [{
-    "result": {
+    "robot": {
         "id": 1,
         "timestamp": "2018-05-12 12:45:10.851596",
         "commands": 2,
