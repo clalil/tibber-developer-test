@@ -69,6 +69,7 @@ class EndpointClient:
         return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
 
     def count_moves(self):
+        start_time = time.perf_counter()
         coordinates = [(("x", self.x), ("y", self.y))]
         x = self.x
         y = self.y
@@ -82,22 +83,24 @@ class EndpointClient:
                     coordinates.append((("x", x), ("y", y)))
         # pdb.set_trace()
         unique_moves = len(set(coordinates))
-        return unique_moves
-
-    def create_response_body(self):
-        start_time = time.perf_counter()
-        response_body = [{
-            "robot": {
-                "id": 0,
-                "timestamp": str(self.timestamp()),
-                "commands": self.sum_moves,
-                "result": self.count_moves(),
-                "duration": 0
-            }
-        }]
         duration_six_decimals = "{:.4f}".format(time.perf_counter() - start_time)
-        response_body[0]["robot"]["duration"] = duration_six_decimals
-        return response_body
+        return unique_moves, duration_six_decimals
+
+    def create_response(self):
+        response = []
+        unique_moves, duration = self.count_moves()
+        rows = DataBase(self.timestamp(), self.sum_moves, unique_moves, duration)
+        for row in rows:
+            response.append({
+            "robot": {
+                "id": row[0],
+                "timestamp": row[1],
+                "commands": row[2],
+                "result": row[3],
+                "duration": row[4]
+            }
+        })
+        return response
 
 
 def app_response_body(resp):
@@ -105,7 +108,7 @@ def app_response_body(resp):
     y = resp["start"]["y"]
     moves = resp['commmands']
     client = EndpointClient(x, y, moves)
-    resp_body = client.create_response_body()
+    resp_body = client.create_response()
     return resp_body
 
 
