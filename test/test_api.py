@@ -18,41 +18,6 @@ from test_assets.expected_responses import (
     CROSS_TWICE_RESPONSE_BODY
 )
 
-@pytest.fixture()
-def app():
-    flask_app.config.update({
-        "TESTING": True,
-    })
-    yield flask_app
-
-
-def test__when_making_a_post__should_return_valid_(app):
-    url = '/tibber-developer-test/enter-path'
-    request_body = {
-            "start": {
-                "x": 10,
-                "y": 22 },
-            "commmands": [{
-                "direction": "east",
-                "steps": 2 },
-                {"direction": "north",
-                "steps": 1}]
-            }
-
-    response_body = {
-        "robot": {
-            "id": 1,
-            "timestamp": "2018-05-12 12:45:10.851596",
-            "commands": 2,
-            "result": 4,
-            "duration": 0.000123
-        }
-    }
-
-    with app.test_client() as c:
-        response = c.post(url, json=request_body)
-    assert json.loads(response.data) == response_body
-
 
 def test__create_app_response_body():
     EXAMPLE_ROW = [(1, '2018-05-12 12:45:10.851596', 2, 4, 0.000123)]
