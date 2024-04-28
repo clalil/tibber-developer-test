@@ -54,13 +54,14 @@ class DataBase:
             self.response["error"] = "Internal Service Error [500]: Failed to read values from Database."
         return self.db_rows
 
+
 class EndpointClient:
     def __init__(self, x, y, moves):
         self.x = x
         self.y = y
         self.moves = moves
         self.directions = {"north": 1, "east": 1, "south": -1, "west": -1}
-        self.duration = 0
+        self.duration = None
         self.sum_moves = len(moves)
         self.unique_moves = 0
 
@@ -83,40 +84,51 @@ class EndpointClient:
                     coordinates.append((("x", x), ("y", y)))
         # pdb.set_trace()
         unique_moves = len(set(coordinates))
-        duration_six_decimals = "{:.4f}".format(time.perf_counter() - start_time)
-        return unique_moves, duration_six_decimals
+        self.duration = "{:.4f}".format(time.perf_counter() - start_time)
+        return unique_moves, self.duration
 
-    def create_response(self):
+    def run_robot(self):
         response = []
         unique_moves, duration = self.count_moves()
-        rows = DataBase(self.timestamp(), self.sum_moves, unique_moves, duration)
-        for row in rows:
-            response.append({
-            "robot": {
-                "id": row[0],
-                "timestamp": row[1],
-                "commands": row[2],
-                "result": row[3],
-                "duration": row[4]
-            }
-        })
-        return response
+        return self.timestamp(), self.sum_moves, unique_moves, duration
 
 
-def app_response_body(resp):
+def create_response_body(rows):
+    response = []
+    for row in rows:
+        response.append({
+        "robot": {
+            "id": row[0],
+            "timestamp": row[1],
+            "commands": row[2],
+            "result": row[3],
+            "duration": row[4]
+        }
+    })
+    return response
+
+
+def create_app_response_body(resp):
     x = resp["start"]["x"]
     y = resp["start"]["y"]
     moves = resp['commmands']
     client = EndpointClient(x, y, moves)
-    resp_body = client.create_response()
-    return resp_body
+    timestamp, sum_commands, unique_moves, duration = client.run_robot()
+    db = DataBase(timestamp, sum_commands, unique_moves, duration)
+
+    # Save to DB & Read from DB
+    db.save_to_db()
+    rows = db.read_from_db()
+
+    result = create_response_body(rows)
+    return result
 
 
 @app.post("/tibber-developer-test/enter-path")
 def create_request():
         if request.is_json:
             request_body = request.get_json(silent=False)
-            response_body = app_response_body(request_body)
+            response_body = create_app_response_body(request_body)
             return jsonify(response_body), 201
         return {"error": "Request must be JSON"}, 415
 
