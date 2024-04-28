@@ -125,6 +125,7 @@ def create_app_response_body(resp):
     db = DataBase(timestamp, sum_commands, unique_moves, duration)
 
     # Save to DB & Read from DB
+    db.setup_db()
     db.save_to_db()
     rows, db_response = db.read_from_db()
 
@@ -137,12 +138,13 @@ def create_request():
         if request.is_json:
             request_body = request.get_json(silent=False)
             response_body = create_app_response_body(request_body)
-
+            # json.dumps() if should send as bytes
             response = app.response_class(
-            response=json.dumps(response_body[0]["data"]),
+            response=json.dumps(response_body),
             status=200,
             mimetype='application/json'
         )
+            # pdb.set_trace()
             return response
         return {"error": "Request must be JSON"}, 415
 
