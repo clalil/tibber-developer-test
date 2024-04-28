@@ -13,6 +13,8 @@ SQL_CREATE_DB_TABLE = '''CREATE TABLE IF NOT EXISTS robot (
         result INT, 
         duration REAL)'''
 
+SQL_INSERT_VALUES = 'INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)'
+
 
 class DataBase:
     def __init__(self, timestamp, commands, result, duration):
@@ -36,13 +38,13 @@ class DataBase:
         connection = sqlite3.connect("production_db")
         with connection:
             try:
-                connection.execute('INSERT INTO robot VALUES(?,?,?,?)', (self.timestamp, self.commands, self.result, self.duration))
+                connection.execute(SQL_INSERT_VALUES, (self.timestamp, self.commands, self.result, self.duration))
+                # pdb.set_trace()
                 print("Successfully entered values into Database")
             except sqlite3.Error as e:
                 print(f"Error: Failed to enter values into Database due to: {e}")
                 self.response["status_code"] = 500
                 self.response["error"] = "Internal Service Error [500]: Failed to enter values into Database."
-                connection.rollback()
 
     def read_from_db(self):
         connection = sqlite3.connect("production_db")
@@ -51,7 +53,7 @@ class DataBase:
                 rows = connection.execute('SELECT * FROM robot').fetchall()
                 self.db_rows.extend(rows)
             except sqlite3.Error as e:
-                print(f"Error: Failed to enter values into Database due to: {e}")
+                print(f"Error: Failed to read values into Database due to: {e}")
                 self.response["status_code"] = 500
                 self.response["error"] = "Internal Service Error [500]: Failed to read values from Database."
             return self.db_rows
