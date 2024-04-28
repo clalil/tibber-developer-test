@@ -1,11 +1,9 @@
-from src.api import app as flask_app 
 from src.api import EndpointClient, create_response_body
 from freezegun import freeze_time
 from unittest.mock import patch
 from src.api import DataBase
 import json
 import pytest
-import pdb
 
 from test_assets.request_bodies import (
     TWO_COMMANDS_REQUEST_BODY,
@@ -23,6 +21,7 @@ def test__create_app_response_body():
     EXAMPLE_ROW = [(1, '2018-05-12 12:45:10.851596', 2, 4, 0.000123)]
     response = create_response_body(EXAMPLE_ROW, 201)
     assert response == TWO_COMMANDS_RESPONSE_BODY
+
 
 @pytest.mark.parametrize(
     "request_body, response_body",

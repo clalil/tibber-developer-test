@@ -1,6 +1,5 @@
 import pytest
 import sqlite3
-import pdb
 from src.api import DataBase
 from freezegun import freeze_time
 from unittest.mock import patch
@@ -50,6 +49,7 @@ def test_existing_name(capsys):
             conn.execute(SQL)
             db = DataBase('2018-05-12 12:45:10.851596', 2, 4, 0.000123)
             db.save_to_db()
+
     captured = capsys.readouterr()
     # Note: print() function has default argument end='\n', which is responsible for the end of line
     assert captured.out == "Successfully entered values into Database\n"

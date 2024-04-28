@@ -1,9 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 import datetime as datetime
 import json
 import sqlite3
 import time
-import pdb
 
 app = Flask(__name__)
 
@@ -136,7 +135,7 @@ def create_request():
         if request.is_json:
             request_body = request.get_json(silent=False)
             response_body = create_app_response_body(request_body)
-            # json.dumps() if should send as bytes
+
             response = app.response_class(
             response=json.dumps(response_body),
             status=200,
