@@ -4,7 +4,7 @@ TWO_COMMANDS_RESPONSE_BODY = [{
                 "id": 1,
                 "result": 4,
                 "timestamp": "2018-05-12 12:45:10.851596"}],
-            "status": 200
+            "status": 201
         }]
 
 TRACK_BACK_RESPONSE_BODY = [{
@@ -13,7 +13,7 @@ TRACK_BACK_RESPONSE_BODY = [{
                 "id": 1,
                 "result": 3,
                 "timestamp": "2018-05-12 12:45:10.851596"}],
-            "status": 200
+            "status": 201
         }]
 
 
@@ -23,5 +23,5 @@ CROSS_TWICE_RESPONSE_BODY = [{
                 "id": 1,
                 "result": 9,
                 "timestamp": "2018-05-12 12:45:10.851596"}],
-            "status": 200
+            "status": 201
         }]

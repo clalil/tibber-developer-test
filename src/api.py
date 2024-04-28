@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import datetime as datetime
+import json
 import sqlite3
 import time
 import pdb
@@ -21,7 +22,7 @@ class DataBase:
         self.timestamp = timestamp
         self.commands = commands
         self.result = result
-        self.response = {}
+        self.response = {"status_code": 200, "message": None}
         self.duration = duration
         self.db_rows = []
 
@@ -41,10 +42,11 @@ class DataBase:
                 connection.execute(SQL_INSERT_VALUES, (self.timestamp, self.commands, self.result, self.duration))
                 # pdb.set_trace()
                 print("Successfully entered values into Database")
+                self.response["status_code"] = 201
             except sqlite3.Error as e:
                 print(f"Error: Failed to enter values into Database due to: {e}")
                 self.response["status_code"] = 500
-                self.response["error"] = "Internal Service Error [500]: Failed to enter values into Database."
+                self.response["message"] = "Internal Service Error [500]: Failed to enter values into Database."
 
     def read_from_db(self):
         connection = sqlite3.connect("production_db")
@@ -52,11 +54,12 @@ class DataBase:
             try:
                 rows = connection.execute('SELECT * FROM robot').fetchall()
                 self.db_rows.extend(rows)
+                self.response["status_code"] = 201
             except sqlite3.Error as e:
                 print(f"Error: Failed to read values into Database due to: {e}")
                 self.response["status_code"] = 500
-                self.response["error"] = "Internal Service Error [500]: Failed to read values from Database."
-            return self.db_rows
+                self.response["message"] = "Internal Service Error [500]: Failed to read values from Database."
+            return self.db_rows, self.response
 
 
 class EndpointClient:
@@ -96,18 +99,20 @@ class EndpointClient:
         return self.timestamp(), self.sum_moves, unique_moves, duration
 
 
-def create_response_body(rows):
-    response = []
-    for row in rows:
-        response.append({
-        "robot": {
-            "id": row[0],
-            "timestamp": row[1],
-            "commands": row[2],
-            "result": row[3],
-            "duration": row[4]
-        }
-    })
+def create_response_body(rows, status_code, message=None):
+    response = [{"data":[], "status": status_code}]
+    if message:
+        response[0]["message"] = message
+        return response
+    else:
+        for row in rows:
+            response[0]["data"].append({
+                "id": row[0],
+                "timestamp": row[1],
+                "commands": row[2],
+                "result": row[3],
+                "duration": row[4]
+            })
     return response
 
 
@@ -120,10 +125,11 @@ def create_app_response_body(resp):
     db = DataBase(timestamp, sum_commands, unique_moves, duration)
 
     # Save to DB & Read from DB
+    db.setup_db()
     db.save_to_db()
-    rows = db.read_from_db()
-    # pdb.set_trace()
-    result = create_response_body(rows)
+    rows, db_response = db.read_from_db()
+
+    result = create_response_body(rows, db_response["status_code"], db_response["message"])
     return result
 
 
@@ -132,8 +138,16 @@ def create_request():
         if request.is_json:
             request_body = request.get_json(silent=False)
             response_body = create_app_response_body(request_body)
-            return jsonify(response_body), 201
+            # json.dumps() if should send as bytes
+            response = app.response_class(
+            response=json.dumps(response_body),
+            status=200,
+            mimetype='application/json'
+        )
+            # pdb.set_trace()
+            return response
         return {"error": "Request must be JSON"}, 415
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
