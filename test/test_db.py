@@ -1,6 +1,9 @@
 import pytest
 import sqlite3
 import pdb
+from src.api import DataBase
+from freezegun import freeze_time
+from unittest.mock import patch
 
 SQL = '''CREATE TABLE IF NOT EXISTS robot (
         id INTEGER PRIMARY KEY,
@@ -14,7 +17,7 @@ SAMPLE_DATA =[('2018-05-12 12:45:10.851596', 2, 4, 0.000123), ('2018-05-10 12:45
 
 
 @pytest.fixture
-def db():
+def fixture_db():
     conn = sqlite3.connect("test_db")
     with conn:
         try:
@@ -26,16 +29,29 @@ def db():
         conn.rollback()
 
 
-def test__when_initialized__should_be_empty(db):
-    assert len(list(db.execute('SELECT * FROM robot'))) == 0
+def test__when_initialized__should_be_empty(fixture_db):
+    assert len(list(fixture_db.execute('SELECT * FROM robot'))) == 0
 
 
-def test__when_called_upon__should_store_data(db):
-    db.executemany('INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)', SAMPLE_DATA)
-    assert len(list(db.execute('SELECT * FROM robot'))) == 2
+def test__when_called_upon__should_store_data(fixture_db):
+    fixture_db.executemany('INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)', SAMPLE_DATA)
+    assert len(list(fixture_db.execute('SELECT * FROM robot'))) == 2
 
 
-def test__when_values_are_inserted__should_successfully_populate(db):
-    db.execute('INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)', ('2018-05-12 12:45:10.851596', 2, 4, 0.000123))
-    rows = db.execute('SELECT * FROM robot').fetchall()
+def test__when_values_are_inserted__should_successfully_populate(fixture_db):
+    fixture_db.execute('INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)', ('2018-05-12 12:45:10.851596', 2, 4, 0.000123))
+    rows = fixture_db.execute('SELECT * FROM robot').fetchall()
     assert rows == [(1, '2018-05-12 12:45:10.851596', 2, 4, 0.000123)]
+
+
+def test_existing_name(capsys):
+    with patch('src.api.sqlite3') as mock_sqlite3:
+        with mock_sqlite3.connect(":memory:") as conn:
+            conn.execute(SQL)
+            db = DataBase('2018-05-12 12:45:10.851596', 2, 4, 0.000123)
+            db.save_to_db()
+    captured = capsys.readouterr()
+    # Note: print() function has default argument end='\n', which is responsible for the end of line
+    assert captured.out == "Successfully entered values into Database\n"
+
+
