@@ -16,7 +16,12 @@ SAMPLE_DATA =[('2018-05-12 12:45:10.851596', 2, 4, 0.000123), ('2018-05-10 12:45
 def db():
     conn = sqlite3.connect("test_db")
     with conn:
-        conn.execute(SQL)
+        try:
+            cursor = conn.cursor()
+            cursor.execute(SQL)
+        except sqlite3.Error as e:
+            print(f"Error: Database could not be initialized. Due to {e}")
+            conn.rollback()
         yield conn
         conn.rollback()
 
