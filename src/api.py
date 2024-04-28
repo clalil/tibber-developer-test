@@ -23,36 +23,38 @@ class DataBase:
         self.duration = duration
         self.db_rows = []
 
-    @staticmethod
-    def db():
-        conn = sqlite3.connect("production_db")
-        with conn:
+
+    def setup_db(self):
+        connection = sqlite3.connect("production_db")
+        with connection:
             try:
-                cursor = conn.cursor()
-                cursor.execute(SQL_CREATE_DB_TABLE)
+                connection.execute(SQL_CREATE_DB_TABLE)
             except sqlite3.Error as e:
                 print(f"Error: Database could not be initialized. Due to {e}")
-            yield conn
 
     def save_to_db(self):
-        try:
-            db.execute('INSERT INTO robot VALUES(?,?,?,?)', (self.timestamp, self.commands, self.result, self.duration))
-            print("Successfully entered values into Database")
-        except sqlite3.Error as e:
-            print(f"Error: Failed to enter values into Database due to: {e}")
-            self.response["status_code"] = 500
-            self.response["error"] = "Internal Service Error [500]: Failed to enter values into Database."
-            db.rollback()
+        connection = sqlite3.connect("production_db")
+        with connection:
+            try:
+                connection.execute('INSERT INTO robot VALUES(?,?,?,?)', (self.timestamp, self.commands, self.result, self.duration))
+                print("Successfully entered values into Database")
+            except sqlite3.Error as e:
+                print(f"Error: Failed to enter values into Database due to: {e}")
+                self.response["status_code"] = 500
+                self.response["error"] = "Internal Service Error [500]: Failed to enter values into Database."
+                connection.rollback()
 
     def read_from_db(self):
-        try:
-            rows = db.execute('SELECT * FROM robot').fetchall()
-            self.db_rows.extend(rows)
-        except sqlite3.Error as e:
-            print(f"Error: Failed to enter values into Database due to: {e}")
-            self.response["status_code"] = 500
-            self.response["error"] = "Internal Service Error [500]: Failed to read values from Database."
-        return self.db_rows
+        connection = sqlite3.connect("production_db")
+        with connection:
+            try:
+                rows = connection.execute('SELECT * FROM robot').fetchall()
+                self.db_rows.extend(rows)
+            except sqlite3.Error as e:
+                print(f"Error: Failed to enter values into Database due to: {e}")
+                self.response["status_code"] = 500
+                self.response["error"] = "Internal Service Error [500]: Failed to read values from Database."
+            return self.db_rows
 
 
 class EndpointClient:
@@ -82,7 +84,6 @@ class EndpointClient:
                 if move["direction"] == "north" or move["direction"] == "south":
                     y += self.directions[move["direction"]]
                     coordinates.append((("x", x), ("y", y)))
-        # pdb.set_trace()
         unique_moves = len(set(coordinates))
         self.duration = "{:.4f}".format(time.perf_counter() - start_time)
         return unique_moves, self.duration
@@ -119,7 +120,7 @@ def create_app_response_body(resp):
     # Save to DB & Read from DB
     db.save_to_db()
     rows = db.read_from_db()
-
+    # pdb.set_trace()
     result = create_response_body(rows)
     return result
 
