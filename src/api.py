@@ -40,7 +40,6 @@ class DataBase:
         with connection:
             try:
                 connection.execute(SQL_INSERT_VALUES, (self.timestamp, self.commands, self.result, self.duration))
-                # pdb.set_trace()
                 print("Successfully entered values into Database")
                 self.response["status_code"] = 201
             except sqlite3.Error as e:
@@ -124,7 +123,6 @@ def create_app_response_body(resp):
     timestamp, sum_commands, unique_moves, duration = client.run_robot()
     db = DataBase(timestamp, sum_commands, unique_moves, duration)
 
-    # Save to DB & Read from DB
     db.setup_db()
     db.save_to_db()
     rows, db_response = db.read_from_db()
@@ -144,7 +142,7 @@ def create_request():
             status=200,
             mimetype='application/json'
         )
-            # pdb.set_trace()
+
             return response
         return {"error": "Request must be JSON"}, 415
 
