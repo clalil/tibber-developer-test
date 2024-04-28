@@ -4,13 +4,13 @@ from src.api import DataBase
 from freezegun import freeze_time
 from unittest.mock import patch
 
+
 SQL = '''CREATE TABLE IF NOT EXISTS robot (
         id INTEGER PRIMARY KEY,
         timestamp DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')),
         commands INT,
         result INT,
         duration REAL)'''
-
 
 SAMPLE_DATA =[('2018-05-12 12:45:10.851596', 2, 4, 0.000123), ('2018-05-10 12:45:10.851596', 3, 2, 0.000123)]
 
