@@ -1,10 +1,53 @@
 from flask import Flask, request, jsonify
 import datetime as datetime
+import sqlite3
 import time
 import pdb
 
-
 app = Flask(__name__)
+
+SQL_CREATE_DB_TABLE = '''CREATE TABLE IF NOT EXISTS robot 
+        (timestamp DATETIME DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')), 
+        commands INT, 
+        result INT, 
+        duration REAL)'''
+
+
+class DataBase:
+    def __init__(self, timestamp, commands, result, duration):
+        self.timestamp = timestamp
+        self.commands = commands
+        self.result = result
+        self.duration = duration
+        self.result = []
+
+    # should store entry
+    # should return entry
+    @staticmethod
+    def db():
+        conn = sqlite3.connect("production_db")
+        with conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute(SQL_CREATE_DB_TABLE)
+            except sqlite3.Error as e:
+                print(f"Error: Database could not be initialized. Due to {e}")
+                conn.rollback()
+            yield conn
+
+    def save_to_db(self):
+        try:
+            self.db.execute('INSERT INTO robot VALUES(?,?,?,?)', (self.timestamp, self.commands, self.result, self.duration))
+            print("Suucessfully entered values into Database")
+        except sqlite3.Error as e:
+            print(f"Error: Failed to enter values into Database due to: {e}")
+            self.db.rollback()
+
+    def read_from_db(self):
+        cursor = self.db.cursor()
+        rows = cursor.fetchall()
+        for row in rows:
+            self.result.append(row)
 
 class EndpointClient:
     def __init__(self, x, y, moves):
