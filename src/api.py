@@ -6,14 +6,6 @@ import sqlite3
 import time
 import pdb
 
-ENV = os.getenv("ENIRONMENT", "LOCAL")
-USE_DB = ""
-
-if ENV == "LOCAL":
-    USE_DB == "production_local.db"
-elif ENV == "PROD":
-    USE_DB == "production.db"
-
 app = Flask(__name__)
 
 SQL_CREATE_DB_TABLE = '''CREATE TABLE IF NOT EXISTS robot (
@@ -25,6 +17,13 @@ SQL_CREATE_DB_TABLE = '''CREATE TABLE IF NOT EXISTS robot (
 
 SQL_INSERT_VALUES = 'INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)'
 
+ENV = os.getenv("ENVIRONMENT", "LOCAL")
+USE_DB = ""
+
+if ENV == "LOCAL":
+    USE_DB = "production_local.db"
+elif ENV == "PROD":
+    USE_DB = "production.db"
 
 class DataBase:
     def __init__(self, timestamp, commands, result, duration):
@@ -37,7 +36,6 @@ class DataBase:
 
 
     def setup_db(self):
-        pdb.set_trace()
         connection = sqlite3.connect(USE_DB)
         with connection:
             try:
@@ -46,7 +44,7 @@ class DataBase:
                 print(f"Error: Database could not be initialized. Due to {e}")
 
     def save_to_db(self):
-        connection = sqlite3.connect("production_db")
+        connection = sqlite3.connect(USE_DB)
         with connection:
             try:
                 connection.execute(SQL_INSERT_VALUES, (self.timestamp, self.commands, self.result, self.duration))
@@ -58,7 +56,7 @@ class DataBase:
                 self.response["message"] = "Internal Service Error [500]: Failed to enter values into Database."
 
     def read_from_db(self):
-        connection = sqlite3.connect("production_db")
+        connection = sqlite3.connect(USE_DB)
         with connection:
             try:
                 rows = connection.execute('SELECT * FROM robot').fetchall()
@@ -158,9 +156,7 @@ def create_request():
 
 
 if __name__ == "__main__":
-    if os.environ['FLASK_ENV'] == "production":
+    if ENV == "PROD":
         app.run(host="0.0.0.0", port=5000, debug=False)
-    if os.environ['FLASK_ENV'] == "development":
+    if ENV == "LOCAL":
         app.run(host="0.0.0.0", port=5000, debug=True)
-
-
