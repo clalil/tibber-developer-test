@@ -17,7 +17,6 @@ SQL_CREATE_DB_TABLE = '''CREATE TABLE IF NOT EXISTS robot (
 SQL_INSERT_VALUES = 'INSERT INTO robot (timestamp, commands, result, duration) VALUES(?,?,?,?)'
 
 ENV = os.getenv("ENVIRONMENT", "LOCAL")
-USE_DB = ""
 
 if ENV == "LOCAL":
     USE_DB = "localhost.db"
