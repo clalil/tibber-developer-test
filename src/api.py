@@ -1,8 +1,18 @@
 from flask import Flask, request
 import datetime as datetime
 import json
+import os
 import sqlite3
 import time
+import pdb
+
+ENV = os.getenv("ENIRONMENT", "LOCAL")
+USE_DB = ""
+
+if ENV == "LOCAL":
+    USE_DB == "production_local.db"
+elif ENV == "PROD":
+    USE_DB == "production.db"
 
 app = Flask(__name__)
 
@@ -27,7 +37,8 @@ class DataBase:
 
 
     def setup_db(self):
-        connection = sqlite3.connect("production_db")
+        pdb.set_trace()
+        connection = sqlite3.connect(USE_DB)
         with connection:
             try:
                 connection.execute(SQL_CREATE_DB_TABLE)
@@ -147,6 +158,9 @@ def create_request():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    if os.environ['FLASK_ENV'] == "production":
+        app.run(host="0.0.0.0", port=5000, debug=False)
+    if os.environ['FLASK_ENV'] == "development":
+        app.run(host="0.0.0.0", port=5000, debug=True)
 
 
