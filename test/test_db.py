@@ -1,7 +1,6 @@
 import pytest
 import sqlite3
 from src.api import DataBase
-from freezegun import freeze_time
 from unittest.mock import patch
 
 
@@ -53,5 +52,4 @@ def test_existing_name(capsys):
     captured = capsys.readouterr()
     # Note: print() function has default argument end='\n', which is responsible for the end of line
     assert captured.out == "Successfully entered values into Database\n"
-
-
+    assert db.response["status_code"] == 201

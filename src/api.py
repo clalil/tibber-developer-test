@@ -4,7 +4,6 @@ import json
 import os
 import sqlite3
 import time
-import pdb
 
 app = Flask(__name__)
 
@@ -21,7 +20,7 @@ ENV = os.getenv("ENVIRONMENT", "LOCAL")
 USE_DB = ""
 
 if ENV == "LOCAL":
-    USE_DB = "production_local.db"
+    USE_DB = "localhost.db"
 elif ENV == "PROD":
     USE_DB = "production.db"
 
@@ -33,7 +32,6 @@ class DataBase:
         self.response = {"status_code": 200, "message": None}
         self.duration = duration
         self.db_rows = []
-
 
     def setup_db(self):
         connection = sqlite3.connect(USE_DB)
@@ -89,7 +87,7 @@ class EndpointClient:
         x = self.x
         y = self.y
         for move in self.moves:
-            for step in range(move["steps"]):
+            for _ in range(move["steps"]):
                 if move["direction"] == "east" or move["direction"] == "west":
                     x += self.directions[move["direction"]]
                     coordinates.append((("x", x), ("y", y)))
@@ -101,7 +99,6 @@ class EndpointClient:
         return unique_moves, self.duration
 
     def run_robot(self):
-        response = []
         unique_moves, duration = self.count_moves()
         return self.timestamp(), self.sum_moves, unique_moves, duration
 
